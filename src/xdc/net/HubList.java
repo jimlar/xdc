@@ -7,13 +7,14 @@ import java.net.HttpURLConnection;
 import java.util.*;
 import java.io.*;
 
-public class PublicHubList {
+public class HubList {
+    private static final String DCPP_HUBLIST_URL = "http://dcplusplus.sourceforge.net/PublicHubList.config";
     private static final String PUBLIC_HUBLIST_URL = "http://www.neo-modus.com/PublicHubList.config";
 
-    private Logger logger = Logger.getLogger(PublicHubList.class);
+    private Logger logger = Logger.getLogger(HubList.class);
     private List hubs;
 
-    public PublicHubList() throws IOException {
+    public HubList() throws IOException {
         refresh();
     }
 
@@ -24,8 +25,15 @@ public class PublicHubList {
     public void refresh() throws IOException {
         this.hubs = new ArrayList();
 
-        logger.debug("Retrieving hublist");
-        HttpURLConnection connection = (HttpURLConnection) new URL(PUBLIC_HUBLIST_URL).openConnection();
+        loadHubList(new URL(PUBLIC_HUBLIST_URL));
+        loadHubList(new URL(DCPP_HUBLIST_URL));
+
+        logger.debug("Found " + hubs.size() + " hubs");
+    }
+
+    private void loadHubList(URL url) throws IOException {
+        logger.debug("Retrieving hublist from " + url);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
         String line;
@@ -46,6 +54,5 @@ public class PublicHubList {
         }
         reader.close();
         connection.disconnect();
-        logger.debug("Found " + hubs.size() + " hubs");
     }
 }

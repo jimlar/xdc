@@ -10,7 +10,7 @@ import java.io.IOException;
 public class HubsTableModel extends AbstractTableModel {
     private Logger logger = Logger.getLogger(HubsTableModel.class);
 
-    private HubList publicHubList;
+    private HubList hubList;
     private Exception error;
 
     public HubsTableModel() {
@@ -25,7 +25,7 @@ public class HubsTableModel extends AbstractTableModel {
         if (hasError()) {
             return 1;
         }
-        return publicHubList != null ? publicHubList.getHubs().size() : 0;
+        return hubList != null ? hubList.getHubs().size() : 0;
     }
 
     private boolean hasError() {
@@ -60,11 +60,11 @@ public class HubsTableModel extends AbstractTableModel {
             return error.getMessage();
         }
 
-        if (publicHubList == null) {
+        if (hubList == null) {
             return null;
         }
 
-        Hub hub = (Hub) publicHubList.getHubs().get(rowIndex);
+        Hub hub = (Hub) hubList.getHubs().get(rowIndex);
         switch (columnIndex) {
             case 0:
                 return hub.getName();
@@ -81,8 +81,8 @@ public class HubsTableModel extends AbstractTableModel {
     }
 
     public Hub getHub(int row) {
-        if (publicHubList != null) {
-            return (Hub) publicHubList.getHubs().get(row);
+        if (hubList != null) {
+            return (Hub) hubList.getHubs().get(row);
         }
         return null;
     }
@@ -92,10 +92,10 @@ public class HubsTableModel extends AbstractTableModel {
             try {
                 setError(new Exception("Loading..."));
                 fireTableStructureChanged();
-                if (publicHubList == null) {
-                    publicHubList = new HubList();
+                if (hubList == null) {
+                    hubList = new HubList();
                 } else {
-                    publicHubList.refresh();
+                    hubList.refresh();
                 }
                 setError(null);
             } catch (IOException e) {
