@@ -124,22 +124,29 @@ public class HubConnection extends Thread {
             StringTokenizer st = new StringTokenizer(command.getArgs(), "$$");
             while (st.hasMoreTokens()) {
                 String nick = st.nextToken();
-                sendCommand(Command.createGetInfoCommand(remoteUser, nick));
+                User user = createAndGetUserByNick(nick);
+                sendCommand(Command.createGetInfoCommand(remoteUser, user));
             }
 
         } else if (command.isOpListCommand()) {
             StringTokenizer st = new StringTokenizer(command.getArgs(), "$$");
             while (st.hasMoreTokens()) {
                 String nick = st.nextToken();
+                User op = createAndGetUserByNick(nick);
+                op.setOperator(true);
                 operatorUserNicks.add(nick);
+                fireUserModified(op);
             }
 
         } else if (command.isMyInfoCommand()) {
-            User newUser = decodeUser(command);
-            if (addHubUser(newUser)) {
-                newUser.setOperator(operatorUserNicks.contains(newUser.getNick()));
-                fireUserArrived(newUser);
-            }
+            User decodedUser = decodeUser(command);
+            User hubUser = createAndGetUserByNick(decodedUser.getNick());
+            hubUser.setDescription(decodedUser.getDescription());
+            hubUser.setEmail(decodedUser.getEmail());
+            hubUser.setSharedSize(decodedUser.getSharedSize());
+            hubUser.setSpeed(decodedUser.getSpeed());
+            hubUser.setSpeedCode(decodedUser.getSpeedCode());
+            fireUserModified(hubUser);
 
         } else if (command.isForceMoveCommand()) {
             fireForceMove(command);
@@ -157,7 +164,7 @@ public class HubConnection extends Thread {
             firePasswordRequired();
 
         } else if (command.isQuitCommand()) {
-            User disconnectedUser = getUserByNick(command.getArgs());
+            User disconnectedUser = (User) usersByNick.get(command.getArgs());
             if (disconnectedUser != null) {
                 operatorUserNicks.remove(disconnectedUser.getNick());
                 removeHubUser(disconnectedUser);
@@ -169,19 +176,19 @@ public class HubConnection extends Thread {
         }
     }
 
-    /**
-     * @return true if the remoteUser was actually added (dit not already exist)
-     */
-    private boolean addHubUser(User user) {
-        return usersByNick.put(user.getNick(), user) == null;
-    }
-
     private void removeHubUser(User user) {
         usersByNick.remove(user.getNick());
     }
 
-    private User getUserByNick(String nick) {
-        return (User) usersByNick.get(nick);
+    private User createAndGetUserByNick(String nick) {
+        User user = (User) usersByNick.get(nick);
+        if (user == null) {
+            user = new User(nick);
+            user.setOperator(operatorUserNicks.contains(user.getNick()));
+            usersByNick.put(nick, user);
+            fireUserArrived(user);
+        }
+        return user;
     }
 
     private User decodeUser(Command command) {
@@ -190,24 +197,34 @@ public class HubConnection extends Thread {
         /* Strip "$ALL " away */
         userInfo = userInfo.substring(5, userInfo.length());
 
-        StringTokenizer st = new StringTokenizer(userInfo, "$");
+        StringTokenizer st = new StringTokenizer(userInfo, "$", true);
         String nickAndDesc = st.nextToken();
+        st.nextToken(); /* Skip delimiter */
         int i = nickAndDesc.indexOf(" ");
         User user = new User(nickAndDesc.substring(0, i));
         user.setDescription(nickAndDesc.substring(i + 1));
-        st.nextToken(); // unknown info.
+        st.nextToken(); /* unknown info. */
+        st.nextToken(); /* Skip delimiter */
 
         String rawSpeed = st.nextToken();
+        st.nextToken(); /* Skip delimiter */
         user.setSpeed(rawSpeed.substring(0, rawSpeed.length() - 1));
 
         char c = rawSpeed.charAt(rawSpeed.length() - 1);
         user.setSpeedCode(c);
 
-        if (st.countTokens() > 1) {
+        if (st.countTokens() > 3) {
             user.setEmail(st.nextToken());
         }
+        st.nextToken(); /* Skip delimiter */
 
-        user.setSharedSize(Long.parseLong(st.nextToken()));
+        try {
+            if (st.countTokens() > 1) {
+                user.setSharedSize(Long.parseLong(st.nextToken()));
+            }
+        } catch (NumberFormatException e) {
+            user.setSharedSize(0);
+        }
         return user;
     }
 
@@ -245,16 +262,10 @@ public class HubConnection extends Thread {
             int authorEnd = args.indexOf("$", authorStart);
             String authorNick = args.substring(authorStart, authorEnd).trim();
             String message = args.substring(authorEnd + 1);
-            if (authorNick.equalsIgnoreCase("hub")) {
-                fireHubMessage(message);
-                return;
-            }
-            User author = getUserByNick(authorNick);
-            if (author != null) {
-                for (Iterator i = listeners.iterator(); i.hasNext();) {
-                    HubConnectionListener listener = (HubConnectionListener) i.next();
-                    listener.privateChatMessage(this, author, message);
-                }
+            User author = createAndGetUserByNick(authorNick);
+            for (Iterator i = listeners.iterator(); i.hasNext();) {
+                HubConnectionListener listener = (HubConnectionListener) i.next();
+                listener.privateChatMessage(this, author, message);
             }
         }
     }
@@ -263,6 +274,13 @@ public class HubConnection extends Thread {
         for (Iterator i = listeners.iterator(); i.hasNext();) {
             HubConnectionListener listener = (HubConnectionListener) i.next();
             listener.userArrived(this, newUser);
+        }
+    }
+
+    private void fireUserModified(User user) {
+        for (Iterator i = listeners.iterator(); i.hasNext();) {
+            HubConnectionListener listener = (HubConnectionListener) i.next();
+            listener.userModified(this, user);
         }
     }
 

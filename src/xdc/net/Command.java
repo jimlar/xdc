@@ -46,8 +46,8 @@ public class Command {
         return new Command(false, MYINFO_COMMAND, userInfo);
     }
 
-    public static Command createGetInfoCommand(User requestor, String requestInfoForNick) {
-        return new Command(false, GET_INFO_COMMAND, requestInfoForNick + " " + requestor.getNick());
+    public static Command createGetInfoCommand(User requestor, User requestInfoFor) {
+        return new Command(false, GET_INFO_COMMAND, requestInfoFor.getNick() + " " + requestor.getNick());
     }
 
     public static Command createHubMessage(User author, String message) {

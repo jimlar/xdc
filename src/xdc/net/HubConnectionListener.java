@@ -16,6 +16,8 @@ public interface HubConnectionListener {
 
     void userArrived(HubConnection connection, User newUser);
 
+    void userModified(HubConnection connection, User user);
+
     void userDisconnected(HubConnection connection, User disconnectedUser);
 
     void forceMove(HubConnection connection, Command moveCommand);
