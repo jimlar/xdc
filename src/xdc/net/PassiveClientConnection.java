@@ -14,11 +14,15 @@ import java.net.Socket;
  * This is what you want to do on uploads and downloads (including filelist downloads).
  *
  */
-public class ClientConnection {
+public class PassiveClientConnection extends Thread {
     private static final int RECEIVE_BUFFER_SIZE = 32 * 1024;
 
-    private static Logger logger = Logger.getLogger(ClientConnection.class);
+    private static Logger logger = Logger.getLogger(PassiveClientConnection.class);
 
+    private User localUser;
+
+    /* passive means that we are NOT the socket server */
+    private boolean passive;
     private String host;
     private int port;
     private List listeners;
@@ -26,7 +30,9 @@ public class ClientConnection {
     private Socket socket;
     private CommandWriter writer;
 
-    public ClientConnection(String host, int port) {
+    public PassiveClientConnection(User localUser, boolean passive, String host, int port) {
+        this.localUser = localUser;
+        this.passive = passive;
         this.host = host;
         this.port = port;
         this.listeners = new ArrayList();
@@ -36,23 +42,6 @@ public class ClientConnection {
         this.listeners.add(listener);
     }
 
-    public void connect() {
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    socket = new Socket(host, port);
-                    socket.setReceiveBufferSize(RECEIVE_BUFFER_SIZE);
-                    writer = new CommandWriter(socket.getOutputStream());
-
-                    fireConnected();
-
-                } catch (Throwable e) {
-                    disconnect(e.getMessage());
-                }
-            }
-        }).start();
-    }
-
     public void disconnect() {
         disconnect("Disconnected");
     }
@@ -60,7 +49,7 @@ public class ClientConnection {
     private void disconnect(String message) {
         fireDisconnected(message);
         try {
-            socket.close();
+            this.close();
         } catch (Exception e) {
             logger.warn("Error disconnecting (ignored)", e);
         }
@@ -80,10 +69,6 @@ public class ClientConnection {
 
     }
 
-    private boolean isConnected() {
-        return socket != null;
-    }
-
     private void fireDisconnected(String message) {
         for (Iterator i = listeners.iterator(); i.hasNext();) {
             ClientConnectionListener listener = (ClientConnectionListener) i.next();
@@ -96,5 +81,32 @@ public class ClientConnection {
             ClientConnectionListener listener = (ClientConnectionListener) i.next();
             listener.connected(this);
         }
+    }
+
+    public void run() {
+        try {
+            socket = new Socket(host, port);
+            socket.setReceiveBufferSize(RECEIVE_BUFFER_SIZE);
+            writer = new CommandWriter(socket.getOutputStream());
+
+            writer.writeCommand(Command.createMyNickCommand(localUser));
+            writer.writeCommand(Command.createLockCommand());
+
+            fireConnected();
+
+        } catch (Throwable e) {
+            disconnect(e.getMessage());
+        }
+    }
+
+    public void close() throws IOException {
+        if (socket != null) {
+            socket.close();
+            socket = null;
+        }
+    }
+
+    public boolean isConnected() {
+        return socket != null;
     }
 }

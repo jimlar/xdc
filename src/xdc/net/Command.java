@@ -1,6 +1,7 @@
 package xdc.net;
 
 class Command {
+    private static final String MY_NICK_COMMAND = "MyNick";
     private static final String GET_COMMAND = "Get";
     private static final String GETPASS_COMMAND = "GetPass";
     private static final String REVERSECONNECTTOME_COMMAND = "RevConnectToMe";
@@ -70,7 +71,15 @@ class Command {
      * @return the command
      */
     public static Command createGetFileCommand(String filename, int resumeFromByte) {
-        return new Command(false, GET_COMMAND, filename + "$" + (resumeFromByte + 1);
+        return new Command(false, GET_COMMAND, filename + "$" + (resumeFromByte + 1));
+    }
+
+    public static Command createMyNickCommand(User user) {
+        return new Command(false, MY_NICK_COMMAND, user.getNick());
+    }
+
+    public static Command createLockCommand() {
+        return new Command(false, LOCK_COMMAND, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA Pk=BBBBBBBBBBB");
     }
 
     Command(boolean isHubMessage, String command, String args) {

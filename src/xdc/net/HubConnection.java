@@ -9,7 +9,7 @@ import java.util.*;
 public class HubConnection extends Thread {
     private Logger logger = Logger.getLogger(HubConnection.class);
 
-    private User remoteUser;
+    private User localUser;
     private Hub hub;
     private Socket socket;
     private CommandReader reader;
@@ -19,8 +19,8 @@ public class HubConnection extends Thread {
     private Set operatorUserNicks;
     private boolean disconnected;
 
-    public HubConnection(User remoteUser, Hub hub) {
-        this.remoteUser = remoteUser;
+    public HubConnection(User localUser, Hub hub) {
+        this.localUser = localUser;
         this.hub = hub;
         this.listeners = new ArrayList();
         this.usersByNick = new HashMap();
@@ -45,7 +45,7 @@ public class HubConnection extends Thread {
 
     public void sendHubChatMessage(String message) {
         try {
-            sendCommand(Command.createHubMessage(remoteUser, message));
+            sendCommand(Command.createHubMessage(localUser, message));
         } catch (IOException e) {
             disconnect(e.toString());
         }
@@ -53,7 +53,7 @@ public class HubConnection extends Thread {
 
     public void sendPrivateChatMessage(User toUser, String message) {
         try {
-            sendCommand(Command.createPrivateChatMessage(remoteUser, toUser, message));
+            sendCommand(Command.createPrivateChatMessage(localUser, toUser, message));
         } catch (IOException e) {
             disconnect(e.toString());
         }
@@ -61,7 +61,7 @@ public class HubConnection extends Thread {
 
     public void search(String searchText) {
         try {
-            Search search = new Search(remoteUser.getNick(),
+            Search search = new Search(localUser.getNick(),
                                        false,
                                        false,
                                        0,
@@ -122,16 +122,16 @@ public class HubConnection extends Thread {
             String lock = command.getArgs().substring(0, command.getArgs().toUpperCase().indexOf(" PK="));
             String key = ValidationKey.getValidationKeyFromLock(lock);
             sendCommand(Command.createKeyCommand(key));
-            sendCommand(Command.createValidateNickCommand(remoteUser.getNick()));
+            sendCommand(Command.createValidateNickCommand(localUser.getNick()));
 
         } else if (command.isSearchCommand()) {
             fireSearchReceived(new Search(command));
 
         } else if (command.isHelloCommand()) {
-            if (command.getArgs().equals(remoteUser.getNick())) {
+            if (command.getArgs().equals(localUser.getNick())) {
                 sendCommand(Command.createVersionCommand("1.2"));
                 sendCommand(Command.createGetNickListCommand());
-                sendCommand(Command.createMyInfoCommand(remoteUser));
+                sendCommand(Command.createMyInfoCommand(localUser));
             }
 
         } else if (command.isNickListCommand()) {
@@ -139,7 +139,7 @@ public class HubConnection extends Thread {
             while (st.hasMoreTokens()) {
                 String nick = st.nextToken();
                 User user = createAndGetUserByNick(nick);
-                sendCommand(Command.createGetInfoCommand(remoteUser, user));
+                sendCommand(Command.createGetInfoCommand(localUser, user));
             }
 
         } else if (command.isOpListCommand()) {
