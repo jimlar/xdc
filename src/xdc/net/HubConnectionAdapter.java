@@ -10,7 +10,7 @@ public class HubConnectionAdapter implements HubConnectionListener {
     public void userArrived(HubConnection connection, User newUser) {}
     public void userModified(HubConnection connection, User user) {}
     public void userDisconnected(HubConnection connection, User disconnectedUser) {}
-    public void forceMove(HubConnection connection, String moveTo) {}
+    public void forceMove(HubConnection connection, String moveDestination) {}
     public void searchResult(HubConnection connection, SearchResult result) {}
     public void connectToMe(HubConnection connection, String connectTo) {}
     public void reverseConnectToMe(HubConnection connection, String nick) {}

@@ -20,7 +20,7 @@ public interface HubConnectionListener {
 
     void userDisconnected(HubConnection connection, User disconnectedUser);
 
-    void forceMove(HubConnection connection, String moveTo);
+    void forceMove(HubConnection connection, String moveDestination);
 
     void searchResult(HubConnection connection, SearchResult result);
 
