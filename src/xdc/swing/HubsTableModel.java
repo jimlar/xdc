@@ -2,7 +2,7 @@ package xdc.swing;
 
 import org.apache.log4j.Logger;
 import xdc.net.Hub;
-import xdc.net.PublicHubList;
+import xdc.net.HubList;
 
 import javax.swing.table.AbstractTableModel;
 import java.io.IOException;
@@ -10,7 +10,7 @@ import java.io.IOException;
 public class HubsTableModel extends AbstractTableModel {
     private Logger logger = Logger.getLogger(HubsTableModel.class);
 
-    private PublicHubList publicHubList;
+    private HubList publicHubList;
     private Exception error;
 
     public HubsTableModel() {
@@ -93,7 +93,7 @@ public class HubsTableModel extends AbstractTableModel {
                 setError(new Exception("Loading..."));
                 fireTableStructureChanged();
                 if (publicHubList == null) {
-                    publicHubList = new PublicHubList();
+                    publicHubList = new HubList();
                 } else {
                     publicHubList.refresh();
                 }
