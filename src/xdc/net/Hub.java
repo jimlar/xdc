@@ -17,6 +17,10 @@ public class Hub extends Object {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getHost() {
         return host;
     }

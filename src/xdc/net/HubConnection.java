@@ -7,6 +7,7 @@ public class HubConnection extends Thread {
     private Hub hub;
     private Socket socket;
     private CommandReader reader;
+    private CommandWriter writer;
 
     public HubConnection(Hub hub) throws IOException {
         this.hub = hub;
@@ -18,11 +19,7 @@ public class HubConnection extends Thread {
         try {
             Command command;
             while ((command = reader.readCommand()) != null) {
-                if (!command.isChatMessage()) {
-                    System.out.println("Got command: " + command);
-                } else {
-                    System.out.println("Got message from " + command.getCommand());
-                }
+                processCommand(command);
             }
 
         } catch (IOException e) {
@@ -30,9 +27,36 @@ public class HubConnection extends Thread {
         }
     }
 
+    private void processCommand(Command command) throws IOException {
+        if (command.isChatMessage()) {
+            System.out.println("Got chat message from: " + command.getCommand());
+
+        } else if (command.isHubNameCommand()) {
+            hub.setName(command.getArgs());
+
+        } else if (command.isLockCommand()) {
+            String lock = command.getArgs().substring(0, command.getArgs().toUpperCase().indexOf(" PK="));
+            String key = ValidationKey.getValidationKeyFromLock(lock);
+            sendCommand(Command.createKeyCommand(key));
+            sendCommand(Command.createValidateNickCommand(getMyNick()));
+
+        } else {
+            System.out.println("Got unhandled command: '" + command.getCommand() + "', args='" + command.getArgs() + "'");
+        }
+    }
+
+    private void sendCommand(Command command) throws IOException {
+        writer.writeCommand(command);
+    }
+
+    private String getMyNick() {
+        return "[Bostream]Jim";
+    }
+
     private void connect() throws IOException {
         socket = new Socket(hub.getHost(), hub.getPort());
         socket.setTcpNoDelay(true);
         reader = new CommandReader(socket.getInputStream());
+        writer = new CommandWriter(socket.getOutputStream());
     }
 }

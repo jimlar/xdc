@@ -36,16 +36,19 @@ public class CommandReader {
 
     private Command decodeCommand(String commandString) {
         int commandTypeEnd = commandString.indexOf(COMMAND_PREFIX_SEPARATOR);
-        if (commandTypeEnd != -1) {
-            String commandType = commandString.substring(0, commandTypeEnd);
-            String commandArgs = commandString.substring(commandTypeEnd + 1);
+        String commandType = commandString;
+        String commandArgs = null;
 
-            if (commandType.startsWith("$")) {
-                return new Command(false, commandType.substring(1), commandArgs);
-            } else if (commandType.startsWith("<")) {
-                if (commandType.length() > 1) {
-                    return new Command(true, commandType.substring(1, commandType.length() - 1), commandArgs);
-                }
+        if (commandTypeEnd != -1) {
+            commandType = commandString.substring(0, commandTypeEnd);
+            commandArgs = commandString.substring(commandTypeEnd + 1);
+        }
+
+        if (commandType.startsWith("$")) {
+            return new Command(false, commandType.substring(1), commandArgs);
+        } else if (commandType.startsWith("<")) {
+            if (commandType.length() > 1) {
+                return new Command(true, commandType.substring(1, commandType.length() - 1), commandArgs);
             }
         }
         return null;
