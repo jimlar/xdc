@@ -42,6 +42,10 @@ public class HubConnection extends Thread {
         this.start();
     }
 
+    public void disconnect() {
+        disconnect("Disconnected");
+    }
+
     public void run() {
         try {
             logger.debug("Connecting to " + hub.getHost() + ":" + hub.getPort());
@@ -50,14 +54,27 @@ public class HubConnection extends Thread {
             reader = new CommandReader(socket.getInputStream());
             writer = new CommandWriter(socket.getOutputStream());
             logger.debug("Connected to " + hub.getHost() + ":" + hub.getPort());
+            fireConnected();
             Command command;
             while ((command = reader.readCommand()) != null) {
                 processCommand(command);
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.error("Connection error", e);
+            disconnect(e.toString());
         }
+    }
+
+    private void disconnect(String message) {
+        try {
+            if (socket != null) {
+                socket.close();
+            }
+        } catch (Exception e) {
+            logger.error("Disconnect error", e);
+        }
+        fireDisconnected(message);
     }
 
     private void processCommand(Command command) throws IOException {
@@ -252,6 +269,20 @@ public class HubConnection extends Thread {
         for (Iterator i = listeners.iterator(); i.hasNext();) {
             HubConnectionListener listener = (HubConnectionListener) i.next();
             listener.passwordRequired(this);
+        }
+    }
+
+    private void fireConnected() {
+        for (Iterator i = listeners.iterator(); i.hasNext();) {
+            HubConnectionListener listener = (HubConnectionListener) i.next();
+            listener.connected(this);
+        }
+    }
+
+    private void fireDisconnected(String message) {
+        for (Iterator i = listeners.iterator(); i.hasNext();) {
+            HubConnectionListener listener = (HubConnectionListener) i.next();
+            listener.disconnected(this, message);
         }
     }
 

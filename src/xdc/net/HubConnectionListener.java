@@ -2,6 +2,10 @@ package xdc.net;
 
 public interface HubConnectionListener {
 
+    void connected(HubConnection connection);
+
+    void disconnected(HubConnection connection, String disconnectMessage);
+
     void hubInfoChanged(HubConnection connection, Hub hubInfo);
 
     void receivedSearch(HubConnection connection, Command searchCommand);

@@ -11,13 +11,16 @@ public class XDCFrame extends JFrame {
     private HubsTableModel hubListTableModel;
     private DefaultComboBoxModel connectionsComboBoxModel;
     private JPanel hubDetailsPanel;
+    private JTabbedPane tabbedPane;
+    private JPanel connectedHubsPanel;
 
     public XDCFrame() {
         super("XDC");
 
         Container contentPane = getContentPane();
-        JTabbedPane tabbedPane = new JTabbedPane();
-        contentPane.add(tabbedPane);
+        tabbedPane = new JTabbedPane();
+        contentPane.setLayout(new BorderLayout());
+        contentPane.add(tabbedPane, BorderLayout.CENTER);
 
         hubListTable = new JTable();
         hubListTableModel = new HubsTableModel();
@@ -27,9 +30,9 @@ public class XDCFrame extends JFrame {
         hubListPanel.add(getConnectPanel(), BorderLayout.NORTH);
         hubListPanel.add(new JScrollPane(hubListTable), BorderLayout.CENTER);
 
-        tabbedPane.add("Public Hubs", hubListPanel);
+        tabbedPane.add("Hubs", hubListPanel);
 
-        JPanel connectedHubsPanel = new JPanel(new BorderLayout());
+        connectedHubsPanel = new JPanel(new BorderLayout());
         final CardLayout connectedHubsCardLayout = new CardLayout();
         hubDetailsPanel = new JPanel(connectedHubsCardLayout);
         connectedHubsPanel.add(hubDetailsPanel, BorderLayout.CENTER);
@@ -44,58 +47,24 @@ public class XDCFrame extends JFrame {
             }
         });
 
-        tabbedPane.add("Connected Hubs", connectedHubsPanel);
+        tabbedPane.add("Connections", connectedHubsPanel);
 
-        pack();
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+        setSize(500, 500);
+    }
+
+    private void selectConnectionsTab() {
+        tabbedPane.setSelectedComponent(connectedHubsPanel);
     }
 
     private void connect(Hub hub) {
         HubConnection connection = new HubConnection(getClientUser(), hub);
-        hubDetailsPanel.add(createHubDetailsPanel(connection), hub.getHost());
+        hubDetailsPanel.add(new ConnectionDetailsPanel(connection), hub.getHost());
         connectionsComboBoxModel.addElement(connection);
         connectionsComboBoxModel.setSelectedItem(connection);
-    }
-
-    private Component createHubDetailsPanel(HubConnection con) {
-        JPanel details = new JPanel(new BorderLayout());
-        final JTextArea textArea = new JTextArea();
-        details.add(new JScrollPane(textArea), BorderLayout.CENTER);
-        con.addListener(new HubConnectionListener() {
-            public void hubInfoChanged(HubConnection connection, Hub hubInfo) {
-            }
-            public void receivedSearch(HubConnection connection, Command searchCommand) {
-                textArea.append("Search: " + searchCommand + "\n");
-            }
-            public void hubMessage(HubConnection connection, Command message) {
-                textArea.append("Hub message: " + message + "\n");
-            }
-            public void privateChatMessage(HubConnection connection, Command message) {
-                textArea.append("Private message: " + message + "\n");
-            }
-            public void userArrived(HubConnection connection, User newUser) {
-                textArea.append("User arrived: " + newUser + "\n");
-            }
-            public void userDisconnected(HubConnection connection, User disconnectedUser) {
-                textArea.append("User disconnected: " + disconnectedUser + "\n");
-            }
-            public void forceMove(HubConnection connection, Command moveCommand) {
-                textArea.append("Force move: " + moveCommand + "\n");
-            }
-            public void searchResult(HubConnection connection, Command result) {
-                textArea.append("Search result: " + result + "\n");
-            }
-            public void connectToMe(HubConnection connection, Command command) {
-                textArea.append("Connect to me: " + command + "\n");
-            }
-            public void reverseConnectToMe(HubConnection connection, Command command) {
-                textArea.append("Reverse connect to me: " + command + "\n");
-            }
-            public void passwordRequired(HubConnection connection) {
-                textArea.append("Password required\n");
-            }
-        });
-        con.connect();
-        return details;
+        selectConnectionsTab();
+        connection.connect();
     }
 
     private User getClientUser() {
