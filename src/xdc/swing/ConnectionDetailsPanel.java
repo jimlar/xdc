@@ -21,6 +21,8 @@ public class ConnectionDetailsPanel extends JPanel {
         this.hubMessageSessionPanel = new MessageSessionPanel(connection);
         tabbedPane.addTab("Messages", hubMessageSessionPanel);
 
+        tabbedPane.addTab("Search", new SearchPanel(connection));
+
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                                               true,
                                               tabbedPane,

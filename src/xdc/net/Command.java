@@ -58,6 +58,10 @@ public class Command {
         return new Command(false, TO_COMMAND, toUser.getNick() + " From: " + fromUser.getNick() + " $" + message);
     }
 
+    public static Command createSearchCommand(Search search) {
+        return new Command(false, SEARCH_COMMAND, search.toString());
+    }
+
     Command(boolean isHubMessage, String command, String args) {
         this.isHubMessage = isHubMessage;
         this.command = command;

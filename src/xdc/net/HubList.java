@@ -32,7 +32,7 @@ public class HubList {
     }
 
     private void loadHubList(URL url) throws IOException {
-        logger.debug("Retrieving hublist from " + url);
+        logger.debug("Retrieving hub list from " + url);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 

@@ -45,7 +45,7 @@ public class HubConnection extends Thread {
 
     public void sendHubChatMessage(String message) {
         try {
-            writer.writeCommand(Command.createHubMessage(remoteUser, message));
+            sendCommand(Command.createHubMessage(remoteUser, message));
         } catch (IOException e) {
             disconnect(e.toString());
         }
@@ -53,7 +53,21 @@ public class HubConnection extends Thread {
 
     public void sendPrivateChatMessage(User toUser, String message) {
         try {
-            writer.writeCommand(Command.createPrivateChatMessage(remoteUser, toUser, message));
+            sendCommand(Command.createPrivateChatMessage(remoteUser, toUser, message));
+        } catch (IOException e) {
+            disconnect(e.toString());
+        }
+    }
+
+    public void search(String searchText) {
+        try {
+            Search search = new Search(remoteUser.getNick(),
+                                       false,
+                                       false,
+                                       0,
+                                       "",
+                                       Arrays.asList(new String[] { searchText }));
+            sendCommand(Command.createSearchCommand(search));
         } catch (IOException e) {
             disconnect(e.toString());
         }
