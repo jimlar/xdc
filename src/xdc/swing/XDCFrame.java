@@ -13,10 +13,12 @@ public class XDCFrame extends JFrame {
     private JPanel hubDetailsPanel;
     private JTabbedPane tabbedPane;
     private JPanel connectedHubsPanel;
+    private User remoteUser;
 
     public XDCFrame() {
         super("XDC");
 
+        remoteUser = new User("[SWE]Jim", 40L * 1024 * 1024 * 1024);
         Container contentPane = getContentPane();
         tabbedPane = new JTabbedPane();
         contentPane.setLayout(new BorderLayout());
@@ -59,18 +61,12 @@ public class XDCFrame extends JFrame {
     }
 
     private void connect(Hub hub) {
-        HubConnection connection = new HubConnection(getClientUser(), hub);
+        HubConnection connection = new HubConnection(remoteUser, hub);
         hubDetailsPanel.add(new ConnectionDetailsPanel(connection), hub.getHost());
         connectionsComboBoxModel.addElement(connection);
         connectionsComboBoxModel.setSelectedItem(connection);
         selectConnectionsTab();
         connection.connect();
-    }
-
-    private User getClientUser() {
-        User remote = new User("[SWE]Jim");
-        remote.setSharedSize(40 * 1024 * 1024 * 1024);
-        return remote;
     }
 
     private JPanel getConnectPanel() {

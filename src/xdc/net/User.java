@@ -10,10 +10,15 @@ public class User {
     private boolean isOperator;
 
     public User(String nick) {
+        this(nick, 0);
+    }
+
+    public User(String nick, long sharedSize) {
         this.nick = nick;
+        this.sharedSize = sharedSize;
         this.email = "";
         this.description = "";
-        this.speed = "512";
+        this.speed = "DSL";
         this.speedCode = '\1';
         this.isOperator = false;
     }

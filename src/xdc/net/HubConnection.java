@@ -9,7 +9,7 @@ import java.util.*;
 public class HubConnection extends Thread {
     private Logger logger = Logger.getLogger(HubConnection.class);
 
-    private User user;
+    private User remoteUser;
     private Hub hub;
     private Socket socket;
     private CommandReader reader;
@@ -18,16 +18,12 @@ public class HubConnection extends Thread {
     private Map usersByNick;
     private Set operatorUserNicks;
 
-    public HubConnection(User user, Hub hub) {
-        this.user = user;
+    public HubConnection(User remoteUser, Hub hub) {
+        this.remoteUser = remoteUser;
         this.hub = hub;
         this.listeners = new ArrayList();
         this.usersByNick = new HashMap();
         this.operatorUserNicks = new HashSet();
-    }
-
-    public User getUser() {
-        return user;
     }
 
     public Hub getHub() {
@@ -44,6 +40,14 @@ public class HubConnection extends Thread {
 
     public void disconnect() {
         disconnect("Disconnected");
+    }
+
+    public void sendHubChatMessage(String message) {
+        try {
+            writer.writeCommand(Command.createHubMessage(remoteUser, message));
+        } catch (IOException e) {
+            disconnect(e.toString());
+        }
     }
 
     public void run() {
@@ -92,23 +96,23 @@ public class HubConnection extends Thread {
             String lock = command.getArgs().substring(0, command.getArgs().toUpperCase().indexOf(" PK="));
             String key = ValidationKey.getValidationKeyFromLock(lock);
             sendCommand(Command.createKeyCommand(key));
-            sendCommand(Command.createValidateNickCommand(user.getNick()));
+            sendCommand(Command.createValidateNickCommand(remoteUser.getNick()));
 
         } else if (command.isSearchCommand()) {
             fireSearchReceived(command);
 
         } else if (command.isHelloCommand()) {
-            if (command.getArgs().equals(user.getNick())) {
+            if (command.getArgs().equals(remoteUser.getNick())) {
                 sendCommand(Command.createVersionCommand("1.2"));
                 sendCommand(Command.createGetNickListCommand());
-                sendCommand(Command.createMyInfoCommand(user));
+                sendCommand(Command.createMyInfoCommand(remoteUser));
             }
 
         } else if (command.isNickListCommand()) {
             StringTokenizer st = new StringTokenizer(command.getArgs(), "$$");
             while (st.hasMoreTokens()) {
                 String nick = st.nextToken();
-                sendCommand(Command.createGetInfoCommand(user, nick));
+                sendCommand(Command.createGetInfoCommand(remoteUser, nick));
             }
 
         } else if (command.isOpListCommand()) {
@@ -120,9 +124,10 @@ public class HubConnection extends Thread {
 
         } else if (command.isMyInfoCommand()) {
             User newUser = decodeUser(command);
-            addHubUser(newUser);
-            newUser.setOperator(operatorUserNicks.contains(newUser.getNick()));
-            fireUserArrived(newUser);
+            if (addHubUser(newUser)) {
+                newUser.setOperator(operatorUserNicks.contains(newUser.getNick()));
+                fireUserArrived(newUser);
+            }
 
         } else if (command.isForceMoveCommand()) {
             fireForceMove(command);
@@ -152,8 +157,11 @@ public class HubConnection extends Thread {
         }
     }
 
-    private void addHubUser(User user) {
-        usersByNick.put(user.getNick(), user);
+    /**
+     * @return true if the remoteUser was actually added (dit not already exist)
+     */
+    private boolean addHubUser(User user) {
+        return usersByNick.put(user.getNick(), user) == null;
     }
 
     private void removeHubUser(User user) {

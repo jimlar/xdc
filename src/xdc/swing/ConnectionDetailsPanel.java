@@ -4,20 +4,36 @@ import xdc.net.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class ConnectionDetailsPanel extends JPanel {
     private DefaultListModel userListModel;
+    private JTextArea hubMessagesTextArea;
 
-    public ConnectionDetailsPanel(HubConnection con) {
+    public ConnectionDetailsPanel(final HubConnection con) {
         super(new BorderLayout());
 
         userListModel = new DefaultListModel();
         JList userList = new JList(userListModel);
 
-        final JTextArea textArea = new JTextArea();
+
+        JPanel hubMessagesPanel = new JPanel(new BorderLayout());
+        hubMessagesTextArea = new JTextArea();
+        hubMessagesPanel.add(new JScrollPane(hubMessagesTextArea), BorderLayout.CENTER);
+
+        final JTextField chatInput = new JTextField();
+        hubMessagesPanel.add(chatInput, BorderLayout.SOUTH);
+        chatInput.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                con.sendHubChatMessage(chatInput.getText());
+                chatInput.setText("");
+            }
+        });
+
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                                               true,
-                                              new JScrollPane(textArea),
+                                              hubMessagesPanel,
                                               new JScrollPane(userList));
 
         splitPane.setDividerLocation(350);
@@ -26,10 +42,10 @@ public class ConnectionDetailsPanel extends JPanel {
 
         con.addListener(new HubConnectionAdapter() {
             public void hubMessage(HubConnection connection, Command message) {
-                textArea.append(message + "\n");
+                hubMessagesTextArea.append(message + "\n");
             }
             public void privateChatMessage(HubConnection connection, Command message) {
-                textArea.append("Private message: " + message + "\n");
+                hubMessagesTextArea.append("Private message: " + message + "\n");
             }
             public void userArrived(HubConnection connection, User newUser) {
                 addUser(newUser);

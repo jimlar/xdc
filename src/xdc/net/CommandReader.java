@@ -1,11 +1,14 @@
 package xdc.net;
 
+import org.apache.log4j.Logger;
+
 import java.io.*;
 
 class CommandReader {
     private static final char COMMAND_SEPARATOR = '|';
     private static final String COMMAND_PREFIX_SEPARATOR = " ";
 
+    private Logger logger = Logger.getLogger(CommandReader.class);
     private InputStreamReader in;
 
     public CommandReader(InputStream in) throws IOException {
@@ -31,6 +34,7 @@ class CommandReader {
             }
             command = decodeCommand(result.toString());
         }
+        logger.debug("Received: " + command);
         return command;
     }
 

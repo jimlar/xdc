@@ -42,12 +42,16 @@ public class Command {
     }
 
     public static Command createMyInfoCommand(User user) {
-        String userInfo = "$ALL " + user.getNick() + " " + user.getDescription() + "$ $" + user.getSpeed() + user.getSpeedCode() + "$ $" + user.getSharedSize() + "$";
+        String userInfo = "$ALL " + user.getNick() + " " + user.getDescription() + "$ $" + user.getSpeed() + user.getSpeedCode() + "$" + user.getEmail() + "$" + user.getSharedSize() + "$";
         return new Command(false, MYINFO_COMMAND, userInfo);
     }
 
     public static Command createGetInfoCommand(User requestor, String requestInfoForNick) {
         return new Command(false, GET_INFO_COMMAND, requestInfoForNick + " " + requestor.getNick());
+    }
+
+    public static Command createHubMessage(User author, String message) {
+        return new Command(true, author.getNick(), message);
     }
 
     Command(boolean isHubMessage, String command, String args) {
