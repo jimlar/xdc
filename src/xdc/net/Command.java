@@ -1,6 +1,7 @@
 package xdc.net;
 
 class Command {
+    private static final String GET_COMMAND = "Get";
     private static final String GETPASS_COMMAND = "GetPass";
     private static final String REVERSECONNECTTOME_COMMAND = "RevConnectToMe";
     private static final String CONNECTTOME_COMMAND = "ConnectToMe";
@@ -60,6 +61,16 @@ class Command {
 
     public static Command createSearchCommand(Search search) {
         return new Command(false, SEARCH_COMMAND, search.toString());
+    }
+
+    /**
+     * Create a command to initiate download
+     * @param filename the file to download
+     * @param resumeFromByte the byte to start from (first byte is 0)
+     * @return the command
+     */
+    public static Command createGetFileCommand(String filename, int resumeFromByte) {
+        return new Command(false, GET_COMMAND, filename + "$" + (resumeFromByte + 1);
     }
 
     Command(boolean isHubMessage, String command, String args) {

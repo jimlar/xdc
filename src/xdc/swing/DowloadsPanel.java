@@ -2,11 +2,8 @@ package xdc.swing;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableColumnModel;
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableColumn;
-import java.util.ArrayList;
 import java.awt.*;
+import java.util.ArrayList;
 
 public class DowloadsPanel extends JPanel {
     private DownloadsTableModel downloadsTableModel;
@@ -17,7 +14,6 @@ public class DowloadsPanel extends JPanel {
         JTable downloadsTable = new JTable();
         downloadsTableModel = new DownloadsTableModel();
         downloadsTable.setModel(downloadsTableModel);
-        downloadsTable.getColumnModel().getColumn(0).;
 
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Downloads", new JScrollPane(downloadsTable));
