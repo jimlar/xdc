@@ -8,7 +8,7 @@ public interface HubConnectionListener {
 
     void hubInfoChanged(HubConnection connection, Hub hubInfo);
 
-    void receivedSearch(HubConnection connection, Command searchCommand);
+    void receivedSearch(HubConnection connection, Search search);
 
     void hubMessage(HubConnection connection, String message);
 
@@ -22,7 +22,7 @@ public interface HubConnectionListener {
 
     void forceMove(HubConnection connection, Command moveCommand);
 
-    void searchResult(HubConnection connection, Command result);
+    void searchResult(HubConnection connection, SearchResult result);
 
     void connectToMe(HubConnection connection, Command command);
 

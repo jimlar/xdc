@@ -18,7 +18,9 @@ public class Search {
     private boolean sizeMatters;
     private boolean sizeAtLeast;
     private long size;
-    private String type;
+
+    /** 1=any,2=audio,3=compressed,4=document,5=exe,6=picture,7=videos,8=folder */
+    private int type;
     private List searchWords;
 
     Search(Command command) {
@@ -55,7 +57,7 @@ public class Search {
         data = data.substring(i + 1);
 
         i = data.indexOf("?");
-        type = data.substring(0, i);
+        type = Integer.parseInt(data.substring(0, i));
         data = data.substring(i + 1);
 
         searchWords = new ArrayList();
@@ -65,15 +67,15 @@ public class Search {
         }
     }
 
-    public Search(String nick, boolean sizeMatters, boolean sizeAtLeast, long size, String type, List searchWords) {
+    public Search(String nick, boolean sizeMatters, boolean sizeAtLeast, long size, int type, List searchWords) {
         this(false, null, -1, nick, sizeMatters, sizeAtLeast, size, type, searchWords);
     }
 
-    public Search(String host, int port, boolean sizeMatters, boolean sizeAtLeast, long size, String type, List searchWords) {
+    public Search(String host, int port, boolean sizeMatters, boolean sizeAtLeast, long size, int type, List searchWords) {
         this(true, host, port, null, sizeMatters, sizeAtLeast, size, type, searchWords);
     }
 
-    private Search(boolean activeSearch, String host, int port, String nick, boolean sizeMatters, boolean sizeAtLeast, long size, String type, List searchWords) {
+    private Search(boolean activeSearch, String host, int port, String nick, boolean sizeMatters, boolean sizeAtLeast, long size, int type, List searchWords) {
         this.activeSearch = activeSearch;
         this.host = host;
         this.port = port;
@@ -113,7 +115,8 @@ public class Search {
         return size;
     }
 
-    public String getType() {
+    /** 1=any,2=audio,3=compressed,4=document,5=exe,6=picture,7=videos,8=folder */
+    public int getType() {
         return type;
     }
 

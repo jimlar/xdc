@@ -65,7 +65,7 @@ public class HubConnection extends Thread {
                                        false,
                                        false,
                                        0,
-                                       "",
+                                       1,
                                        Arrays.asList(new String[] { searchText }));
             sendCommand(Command.createSearchCommand(search));
         } catch (IOException e) {
@@ -125,7 +125,7 @@ public class HubConnection extends Thread {
             sendCommand(Command.createValidateNickCommand(remoteUser.getNick()));
 
         } else if (command.isSearchCommand()) {
-            fireSearchReceived(command);
+            fireSearchReceived(new Search(command));
 
         } else if (command.isHelloCommand()) {
             if (command.getArgs().equals(remoteUser.getNick())) {
@@ -166,7 +166,7 @@ public class HubConnection extends Thread {
             fireForceMove(command);
 
         } else if (command.isSearchResultCommand()) {
-            fireSearchResult(command);
+            fireSearchResult(new SearchResult(command));
 
         } else if (command.isConnectToMeCommand()) {
             fireConnectToMe(command);
@@ -253,10 +253,10 @@ public class HubConnection extends Thread {
         }
     }
 
-    private void fireSearchReceived(Command command) {
+    private void fireSearchReceived(Search search) {
         for (Iterator i = listeners.iterator(); i.hasNext();) {
             HubConnectionListener listener = (HubConnectionListener) i.next();
-            listener.receivedSearch(this, command);
+            listener.receivedSearch(this, search);
         }
     }
 
@@ -312,10 +312,10 @@ public class HubConnection extends Thread {
         }
     }
 
-    private void fireSearchResult(Command command) {
+    private void fireSearchResult(SearchResult result) {
         for (Iterator i = listeners.iterator(); i.hasNext();) {
             HubConnectionListener listener = (HubConnectionListener) i.next();
-            listener.searchResult(this, command);
+            listener.searchResult(this, result);
         }
     }
 
