@@ -8,12 +8,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 public class ConnectionDetailsPanel extends JPanel {
+    private HubConnection connection;
     private DefaultListModel userListModel;
     private JTextArea hubMessagesTextArea;
 
-    public ConnectionDetailsPanel(final HubConnection con) {
+    public ConnectionDetailsPanel(final HubConnection connection) {
         super(new BorderLayout());
-
+        this.connection = connection;
         userListModel = new DefaultListModel();
         JList userList = new JList(userListModel);
 
@@ -26,7 +27,7 @@ public class ConnectionDetailsPanel extends JPanel {
         hubMessagesPanel.add(chatInput, BorderLayout.SOUTH);
         chatInput.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                con.sendHubChatMessage(chatInput.getText());
+                connection.sendHubChatMessage(chatInput.getText());
                 chatInput.setText("");
             }
         });
@@ -38,22 +39,26 @@ public class ConnectionDetailsPanel extends JPanel {
 
         splitPane.setDividerLocation(350);
         this.add(splitPane, BorderLayout.CENTER);
-        this.add(new StatusBar(con), BorderLayout.SOUTH);
+        this.add(new StatusBar(connection), BorderLayout.SOUTH);
 
-        con.addListener(new HubConnectionAdapter() {
-            public void hubMessage(HubConnection connection, Command message) {
+        connection.addListener(new HubConnectionAdapter() {
+            public void hubMessage(HubConnection con, Command message) {
                 hubMessagesTextArea.append(message + "\n");
             }
-            public void privateChatMessage(HubConnection connection, Command message) {
+            public void privateChatMessage(HubConnection con, Command message) {
                 hubMessagesTextArea.append("Private message: " + message + "\n");
             }
-            public void userArrived(HubConnection connection, User newUser) {
+            public void userArrived(HubConnection con, User newUser) {
                 addUser(newUser);
             }
-            public void userDisconnected(HubConnection connection, User disconnectedUser) {
+            public void userDisconnected(HubConnection con, User disconnectedUser) {
                 removeUser(disconnectedUser);
             }
         });
+    }
+
+    public HubConnection getConnection() {
+        return connection;
     }
 
     private void removeUser(final User disconnectedUser) {

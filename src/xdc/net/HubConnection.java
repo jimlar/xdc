@@ -17,6 +17,7 @@ public class HubConnection extends Thread {
     private List listeners;
     private Map usersByNick;
     private Set operatorUserNicks;
+    private boolean disconnected;
 
     public HubConnection(User remoteUser, Hub hub) {
         this.remoteUser = remoteUser;
@@ -65,12 +66,15 @@ public class HubConnection extends Thread {
             }
 
         } catch (Exception e) {
-            logger.error("Connection error", e);
-            disconnect(e.toString());
+            if (!disconnected) {
+                logger.error("Connection error", e);
+                disconnect(e.toString());
+            }
         }
     }
 
     private void disconnect(String message) {
+        this.disconnected = true;
         try {
             if (socket != null) {
                 socket.close();
