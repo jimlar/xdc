@@ -166,7 +166,11 @@ public class HubConnection extends Thread {
             fireForceMove(command);
 
         } else if (command.isSearchResultCommand()) {
-            fireSearchResult(new SearchResult(command));
+            try {
+                fireSearchResult(new SearchResult(command));
+            } catch (Exception e) {
+                logger.warn("Discarded unparsable search result: " + command, e);
+            }
 
         } else if (command.isConnectToMeCommand()) {
             fireConnectToMe(command);

@@ -7,7 +7,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 
 public class SearchPanel extends JPanel {
-    private JTextArea results;
+    private JTable resultsTable;
+    private SearchResultsTableModel resultsTableModel;
 
     public SearchPanel(final HubConnection connection) {
         super(new BorderLayout());
@@ -27,12 +28,14 @@ public class SearchPanel extends JPanel {
         inputPanel.add(searchButton, BorderLayout.EAST);
 
         add(inputPanel, BorderLayout.NORTH);
-        results = new JTextArea();
-        add(results, BorderLayout.CENTER);
+
+        resultsTableModel = new SearchResultsTableModel();
+        resultsTable = new JTable(resultsTableModel);
+        add(new JScrollPane(resultsTable), BorderLayout.CENTER);
 
         connection.addListener(new HubConnectionAdapter() {
             public void searchResult(HubConnection con, SearchResult result) {
-                results.append(result.getFilename() + "\n");
+                resultsTableModel.add(result);
             }
         });
     }
