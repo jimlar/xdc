@@ -312,7 +312,7 @@ public class HubConnection extends Thread {
     private void fireForceMove(Command moveCommand) {
         for (Iterator i = listeners.iterator(); i.hasNext();) {
             HubConnectionListener listener = (HubConnectionListener) i.next();
-            listener.forceMove(this, moveCommand);
+            listener.forceMove(this, moveCommand.getArgs());
         }
     }
 
@@ -326,14 +326,24 @@ public class HubConnection extends Thread {
     private void fireConnectToMe(Command command) {
         for (Iterator i = listeners.iterator(); i.hasNext();) {
             HubConnectionListener listener = (HubConnectionListener) i.next();
-            listener.connectToMe(this, command);
+            try {
+                String connectTo = command.getArgs().substring(command.getArgs().indexOf(" ") + 1);
+                listener.connectToMe(this, connectTo);
+            } catch (StringIndexOutOfBoundsException e) {
+                logger.warn("Received corrupt connect to me: " + command);
+            }
         }
     }
 
     private void fireReverseConnectToMe(Command command) {
         for (Iterator i = listeners.iterator(); i.hasNext();) {
             HubConnectionListener listener = (HubConnectionListener) i.next();
-            listener.reverseConnectToMe(this, command);
+            try {
+                String connectTo = command.getArgs().substring(0, command.getArgs().indexOf(" "));
+                listener.reverseConnectToMe(this, connectTo);
+            } catch (StringIndexOutOfBoundsException e) {
+                logger.warn("Received corrupt reverse connect to me: " + command);
+            }
         }
     }
 

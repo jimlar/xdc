@@ -20,13 +20,13 @@ public interface HubConnectionListener {
 
     void userDisconnected(HubConnection connection, User disconnectedUser);
 
-    void forceMove(HubConnection connection, Command moveCommand);
+    void forceMove(HubConnection connection, String moveTo);
 
     void searchResult(HubConnection connection, SearchResult result);
 
-    void connectToMe(HubConnection connection, Command command);
+    void connectToMe(HubConnection connection, String connectTo);
 
-    void reverseConnectToMe(HubConnection connection, Command command);
+    void reverseConnectToMe(HubConnection connection, String nick);
 
     void passwordRequired(HubConnection connection);
 }

@@ -1,6 +1,6 @@
 package xdc.net;
 
-public class Command {
+class Command {
     private static final String GETPASS_COMMAND = "GetPass";
     private static final String REVERSECONNECTTOME_COMMAND = "RevConnectToMe";
     private static final String CONNECTTOME_COMMAND = "ConnectToMe";
