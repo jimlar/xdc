@@ -34,6 +34,7 @@ public class XDCFrame extends JFrame {
         tabbedPane.add("Hubs", hubListPanel);
 
         connectionsPanel = new ConnectionsPanel();
+        tabbedPane.add("Connections", connectionsPanel);
 
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -47,25 +48,12 @@ public class XDCFrame extends JFrame {
     private void connect(Hub hub) {
         HubConnection connection = new HubConnection(remoteUser, hub);
         connectionsPanel.addConnection(connection);
-        boolean isAdded = false;
-        Component[] components = tabbedPane.getComponents();
-        if (components != null) {
-            for (int i = 0; i < components.length; i++) {
-                if (connectionsPanel.equals(components[i])) {
-                    isAdded = true;
-                }
-            }
-        }
-
-        if (!isAdded) {
-            tabbedPane.add("Connections", connectionsPanel);
-        }
         selectConnectionsTab();
         connection.connect();
     }
 
     private JPanel getConnectPanel() {
-        JPanel connectPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel connectPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         JButton connectButton = new JButton(new AbstractAction("Connect") {
             public void actionPerformed(ActionEvent e) {
                 Hub hub = hubListTableModel.getHub(hubListTable.getSelectedRow());

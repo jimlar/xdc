@@ -5,8 +5,8 @@ public class HubConnectionAdapter implements HubConnectionListener {
     public void disconnected(HubConnection connection, String disconnectMessage) {}
     public void hubInfoChanged(HubConnection connection, Hub hubInfo) {}
     public void receivedSearch(HubConnection connection, Command searchCommand) {}
-    public void hubMessage(HubConnection connection, Command message) {}
-    public void privateChatMessage(HubConnection connection, Command message) {}
+    public void hubMessage(HubConnection connection, String message) {}
+    public void privateChatMessage(HubConnection connection, User from, String message) {}
     public void userArrived(HubConnection connection, User newUser) {}
     public void userDisconnected(HubConnection connection, User disconnectedUser) {}
     public void forceMove(HubConnection connection, Command moveCommand) {}

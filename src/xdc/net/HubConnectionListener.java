@@ -10,9 +10,9 @@ public interface HubConnectionListener {
 
     void receivedSearch(HubConnection connection, Command searchCommand);
 
-    void hubMessage(HubConnection connection, Command message);
+    void hubMessage(HubConnection connection, String message);
 
-    void privateChatMessage(HubConnection connection, Command message);
+    void privateChatMessage(HubConnection connection, User from, String message);
 
     void userArrived(HubConnection connection, User newUser);
 

@@ -51,6 +51,14 @@ public class HubConnection extends Thread {
         }
     }
 
+    public void sendPrivateChatMessage(User toUser, String message) {
+        try {
+            writer.writeCommand(Command.createPrivateChatMessage(remoteUser, toUser, message));
+        } catch (IOException e) {
+            disconnect(e.toString());
+        }
+    }
+
     public void run() {
         try {
             logger.debug("Connecting to " + hub.getHost() + ":" + hub.getPort());
@@ -87,7 +95,7 @@ public class HubConnection extends Thread {
 
     private void processCommand(Command command) throws IOException {
         if (command.isHubMessage()) {
-            fireHubMessage(command);
+            fireHubMessage(command.getArgs());
 
         } else if (command.isPrivateChatCommand()) {
             firePrivateChatMessage(command);
@@ -221,17 +229,33 @@ public class HubConnection extends Thread {
         }
     }
 
-    private void fireHubMessage(Command command) {
+    private void fireHubMessage(String message) {
         for (Iterator i = listeners.iterator(); i.hasNext();) {
             HubConnectionListener listener = (HubConnectionListener) i.next();
-            listener.hubMessage(this, command);
+            listener.hubMessage(this, message);
         }
     }
 
     private void firePrivateChatMessage(Command command) {
-        for (Iterator i = listeners.iterator(); i.hasNext();) {
-            HubConnectionListener listener = (HubConnectionListener) i.next();
-            listener.privateChatMessage(this, command);
+        String args = command.getArgs();
+        String FROM = "From: ";
+        int authorStart = args.indexOf(FROM);
+        if (authorStart  != -1) {
+            authorStart += FROM.length();
+            int authorEnd = args.indexOf("$", authorStart);
+            String authorNick = args.substring(authorStart, authorEnd).trim();
+            String message = args.substring(authorEnd + 1);
+            if (authorNick.equalsIgnoreCase("hub")) {
+                fireHubMessage(message);
+                return;
+            }
+            User author = getUserByNick(authorNick);
+            if (author != null) {
+                for (Iterator i = listeners.iterator(); i.hasNext();) {
+                    HubConnectionListener listener = (HubConnectionListener) i.next();
+                    listener.privateChatMessage(this, author, message);
+                }
+            }
         }
     }
 

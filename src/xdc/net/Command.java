@@ -51,7 +51,11 @@ public class Command {
     }
 
     public static Command createHubMessage(User author, String message) {
-        return new Command(true, author.getNick(), message);
+        return new Command(true, null, "<" + author.getNick() + "> " + message);
+    }
+
+    public static Command createPrivateChatMessage(User fromUser, User toUser, String message) {
+        return new Command(false, TO_COMMAND, toUser.getNick() + " From: " + fromUser.getNick() + " $" + message);
     }
 
     Command(boolean isHubMessage, String command, String args) {
@@ -78,7 +82,11 @@ public class Command {
             result += (isHubMessage ? "<" : "$") + command + (isHubMessage ? ">" : "");
         }
         if (args != null && !args.equals("")) {
-            result += " " + args;
+            if (result.equals("")) {
+                result = args;
+            } else {
+                result += " " + args;
+            }
         }
         return result;
     }

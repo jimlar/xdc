@@ -4,13 +4,12 @@ import xdc.net.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 public class ConnectionDetailsPanel extends JPanel {
     private HubConnection connection;
     private DefaultListModel userListModel;
-    private JTextArea hubMessagesTextArea;
+    private MessageSessionPanel hubMessageSessionPanel;
+    private JTabbedPane tabbedPane;
 
     public ConnectionDetailsPanel(final HubConnection connection) {
         super(new BorderLayout());
@@ -18,23 +17,13 @@ public class ConnectionDetailsPanel extends JPanel {
         userListModel = new DefaultListModel();
         JList userList = new JList(userListModel);
 
-
-        JPanel hubMessagesPanel = new JPanel(new BorderLayout());
-        hubMessagesTextArea = new JTextArea();
-        hubMessagesPanel.add(new JScrollPane(hubMessagesTextArea), BorderLayout.CENTER);
-
-        final JTextField chatInput = new JTextField();
-        hubMessagesPanel.add(chatInput, BorderLayout.SOUTH);
-        chatInput.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                connection.sendHubChatMessage(chatInput.getText());
-                chatInput.setText("");
-            }
-        });
+        tabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
+        this.hubMessageSessionPanel = new MessageSessionPanel(connection);
+        tabbedPane.addTab("Messages", hubMessageSessionPanel);
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                                               true,
-                                              hubMessagesPanel,
+                                              tabbedPane,
                                               new JScrollPane(userList));
 
         splitPane.setDividerLocation(350);
@@ -42,19 +31,38 @@ public class ConnectionDetailsPanel extends JPanel {
         this.add(new StatusBar(connection), BorderLayout.SOUTH);
 
         connection.addListener(new HubConnectionAdapter() {
-            public void hubMessage(HubConnection con, Command message) {
-                hubMessagesTextArea.append(message + "\n");
+            public void hubMessage(HubConnection con, String message) {
+                hubMessageSessionPanel.addMessage(message);
             }
-            public void privateChatMessage(HubConnection con, Command message) {
-                hubMessagesTextArea.append("Private message: " + message + "\n");
+
+            public void privateChatMessage(HubConnection con, User from, String message) {
+                MessageSessionPanel sessionPanel = createAndGetMessageSession(from);
+                sessionPanel.addMessage(message);
             }
+
             public void userArrived(HubConnection con, User newUser) {
                 addUser(newUser);
             }
+
             public void userDisconnected(HubConnection con, User disconnectedUser) {
                 removeUser(disconnectedUser);
             }
         });
+    }
+
+    private MessageSessionPanel createAndGetMessageSession(User from) {
+        for (int i = 0; i < tabbedPane.getTabCount(); i++) {
+            String title = tabbedPane.getTitleAt(i);
+            Component component = tabbedPane.getComponentAt(i);
+            if (title.equals(from.getNick()) && component instanceof MessageSessionPanel) {
+                return (MessageSessionPanel) component;
+            }
+        }
+
+        MessageSessionPanel sessionPanel = new MessageSessionPanel(connection, from);
+        tabbedPane.addTab(from.getNick(), sessionPanel);
+        super.validate();
+        return sessionPanel;
     }
 
     public HubConnection getConnection() {
