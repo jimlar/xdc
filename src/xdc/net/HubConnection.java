@@ -18,7 +18,7 @@ public class HubConnection extends Thread {
     private Map usersByNick;
     private Set operatorUserNicks;
 
-    public HubConnection(User user, Hub hub) throws IOException {
+    public HubConnection(User user, Hub hub) {
         this.user = user;
         this.hub = hub;
         this.listeners = new ArrayList();
@@ -38,25 +38,25 @@ public class HubConnection extends Thread {
         this.listeners.add(listener);
     }
 
-    public void connect() throws IOException {
-        logger.debug("Connecting to " + hub.getHost() + ":" + hub.getPort());
-        socket = new Socket(hub.getHost(), hub.getPort());
-        socket.setTcpNoDelay(true);
-        reader = new CommandReader(socket.getInputStream());
-        writer = new CommandWriter(socket.getOutputStream());
-        logger.debug("Connected to " + hub.getHost() + ":" + hub.getPort());
+    public void connect() {
         this.start();
     }
 
     public void run() {
         try {
+            logger.debug("Connecting to " + hub.getHost() + ":" + hub.getPort());
+            socket = new Socket(hub.getHost(), hub.getPort());
+            socket.setTcpNoDelay(true);
+            reader = new CommandReader(socket.getInputStream());
+            writer = new CommandWriter(socket.getOutputStream());
+            logger.debug("Connected to " + hub.getHost() + ":" + hub.getPort());
             Command command;
             while ((command = reader.readCommand()) != null) {
                 processCommand(command);
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Connection error", e);
         }
     }
 
@@ -253,5 +253,9 @@ public class HubConnection extends Thread {
             HubConnectionListener listener = (HubConnectionListener) i.next();
             listener.passwordRequired(this);
         }
+    }
+
+    public String toString() {
+        return getHub().getName();
     }
 }
