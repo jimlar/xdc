@@ -7,9 +7,15 @@ public class User {
     private String speed;
     private char speedCode;
     private long sharedSize;
+    private boolean isOperator;
 
     public User(String nick) {
         this.nick = nick;
+        this.email = "";
+        this.description = "";
+        this.speed = "512";
+        this.speedCode = '\1';
+        this.isOperator = false;
     }
 
     public String getNick() {
@@ -54,6 +60,14 @@ public class User {
 
     public void setSharedSize(long sharedSize) {
         this.sharedSize = sharedSize;
+    }
+
+    public boolean isOperator() {
+        return isOperator;
+    }
+
+    public void setOperator(boolean operator) {
+        isOperator = operator;
     }
 
     public String toString() {

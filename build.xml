@@ -4,7 +4,8 @@
   <property name="build.compiler" value="jikes" />
 
   <property name="classpath" value="src:
-		                    build/classes"/>
+		                            build/classes:
+                                    lib/log4j-1.2.6.jar"/>
 
   <target name="clean">
     <delete dir="build" />
@@ -21,11 +22,13 @@
   </target>
 
   <target name="xdc" depends="compile">
-    <jar jarfile="build/xdc.jar">
+    <copy file="lib/log4j-1.2.6.jar" tofile="build/xdc.jar"/>
+    <jar jarfile="build/xdc.jar" update="true">
       <manifest>
         <attribute name="Main-Class" value="xdc.Main"/>
       </manifest>
       <fileset dir="build/classes" includes="**/*.class"/>
+      <fileset dir="src" excludes="**/*.java"/>
     </jar>
   </target>
 </project>

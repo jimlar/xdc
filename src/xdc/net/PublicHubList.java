@@ -1,5 +1,7 @@
 package xdc.net;
 
+import org.apache.log4j.Logger;
+
 import java.net.URL;
 import java.net.HttpURLConnection;
 import java.util.*;
@@ -8,6 +10,7 @@ import java.io.*;
 public class PublicHubList {
     private static final String PUBLIC_HUBLIST_URL = "http://www.neo-modus.com/PublicHubList.config";
 
+    private Logger logger = Logger.getLogger(PublicHubList.class);
     private List hubs;
 
     public PublicHubList() throws IOException {
@@ -21,6 +24,7 @@ public class PublicHubList {
     public void refresh() throws IOException {
         this.hubs = new ArrayList();
 
+        logger.debug("Retrieving hublist");
         HttpURLConnection connection = (HttpURLConnection) new URL(PUBLIC_HUBLIST_URL).openConnection();
         BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
@@ -42,5 +46,6 @@ public class PublicHubList {
         }
         reader.close();
         connection.disconnect();
+        logger.debug("Found " + hubs.size() + " hubs");
     }
 }

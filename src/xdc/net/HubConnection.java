@@ -1,22 +1,29 @@
 package xdc.net;
 
+import org.apache.log4j.Logger;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.util.*;
 
 public class HubConnection extends Thread {
+    private Logger logger = Logger.getLogger(HubConnection.class);
+
     private User user;
     private Hub hub;
     private Socket socket;
     private CommandReader reader;
     private CommandWriter writer;
     private List listeners;
-
+    private Map usersByNick;
+    private Set operatorUserNicks;
 
     public HubConnection(User user, Hub hub) throws IOException {
         this.user = user;
         this.hub = hub;
         this.listeners = new ArrayList();
+        this.usersByNick = new HashMap();
+        this.operatorUserNicks = new HashSet();
     }
 
     public User getUser() {
@@ -32,10 +39,12 @@ public class HubConnection extends Thread {
     }
 
     public void connect() throws IOException {
+        logger.debug("Connecting to " + hub.getHost() + ":" + hub.getPort());
         socket = new Socket(hub.getHost(), hub.getPort());
         socket.setTcpNoDelay(true);
         reader = new CommandReader(socket.getInputStream());
         writer = new CommandWriter(socket.getOutputStream());
+        logger.debug("Connected to " + hub.getHost() + ":" + hub.getPort());
         this.start();
     }
 
@@ -85,13 +94,57 @@ public class HubConnection extends Thread {
                 sendCommand(Command.createGetInfoCommand(user, nick));
             }
 
+        } else if (command.isOpListCommand()) {
+            StringTokenizer st = new StringTokenizer(command.getArgs(), "$$");
+            while (st.hasMoreTokens()) {
+                String nick = st.nextToken();
+                operatorUserNicks.add(nick);
+            }
+
         } else if (command.isMyInfoCommand()) {
             User newUser = decodeUser(command);
+            addHubUser(newUser);
+            newUser.setOperator(operatorUserNicks.contains(newUser.getNick()));
             fireUserArrived(newUser);
 
+        } else if (command.isForceMoveCommand()) {
+            fireForceMove(command);
+
+        } else if (command.isSearchResultCommand()) {
+            fireSearchResult(command);
+
+        } else if (command.isConnectToMeCommand()) {
+            fireConnectToMe(command);
+
+        } else if (command.isReverseConnectToMeCommand()) {
+            fireReverseConnectToMe(command);
+
+        } else if (command.isPasswordRequiredCommand()) {
+            firePasswordRequired();
+
+        } else if (command.isQuitCommand()) {
+            User disconnectedUser = getUserByNick(command.getArgs());
+            if (disconnectedUser != null) {
+                operatorUserNicks.remove(disconnectedUser.getNick());
+                removeHubUser(disconnectedUser);
+                fireUserDisconnected(disconnectedUser);
+            }
+
         } else {
-            System.out.println("Got unhandled command: '" + command.getCommand() + "', args='" + command.getArgs() + "'");
+            logger.warn("Got unhandled command: '" + command + "'");
         }
+    }
+
+    private void addHubUser(User user) {
+        usersByNick.put(user.getNick(), user);
+    }
+
+    private void removeHubUser(User user) {
+        usersByNick.remove(user.getNick());
+    }
+
+    private User getUserByNick(String nick) {
+        return (User) usersByNick.get(nick);
     }
 
     private User decodeUser(Command command) {
@@ -157,6 +210,48 @@ public class HubConnection extends Thread {
         for (Iterator i = listeners.iterator(); i.hasNext();) {
             HubConnectionListener listener = (HubConnectionListener) i.next();
             listener.userArrived(this, newUser);
+        }
+    }
+
+    private void fireUserDisconnected(User newUser) {
+        for (Iterator i = listeners.iterator(); i.hasNext();) {
+            HubConnectionListener listener = (HubConnectionListener) i.next();
+            listener.userDisconnected(this, newUser);
+        }
+    }
+
+    private void fireForceMove(Command moveCommand) {
+        for (Iterator i = listeners.iterator(); i.hasNext();) {
+            HubConnectionListener listener = (HubConnectionListener) i.next();
+            listener.forceMove(this, moveCommand);
+        }
+    }
+
+    private void fireSearchResult(Command command) {
+        for (Iterator i = listeners.iterator(); i.hasNext();) {
+            HubConnectionListener listener = (HubConnectionListener) i.next();
+            listener.searchResult(this, command);
+        }
+    }
+
+    private void fireConnectToMe(Command command) {
+        for (Iterator i = listeners.iterator(); i.hasNext();) {
+            HubConnectionListener listener = (HubConnectionListener) i.next();
+            listener.connectToMe(this, command);
+        }
+    }
+
+    private void fireReverseConnectToMe(Command command) {
+        for (Iterator i = listeners.iterator(); i.hasNext();) {
+            HubConnectionListener listener = (HubConnectionListener) i.next();
+            listener.reverseConnectToMe(this, command);
+        }
+    }
+
+    private void firePasswordRequired() {
+        for (Iterator i = listeners.iterator(); i.hasNext();) {
+            HubConnectionListener listener = (HubConnectionListener) i.next();
+            listener.passwordRequired(this);
         }
     }
 }

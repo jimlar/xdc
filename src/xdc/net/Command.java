@@ -1,13 +1,20 @@
 package xdc.net;
 
 public class Command {
+    private static final String GETPASS_COMMAND = "GetPass";
+    private static final String REVERSECONNECTTOME_COMMAND = "RevConnectToMe";
+    private static final String CONNECTTOME_COMMAND = "ConnectToMe";
+    private static final String FORCEMOVE_COMMAND = "ForceMove";
+    private static final String QUIT_COMMAND = "Quit";
     private static final String GET_INFO_COMMAND = "GetINFO";
     private static final String TO_COMMAND = "To:";
     private static final String MYINFO_COMMAND = "MyINFO";
+    private static final String OPLIST_COMMAND = "OpList";
     private static final String NICKLIST_COMMAND = "NickList";
     private static final String GET_NICKLIST_COMMAND = "GetNickList";
     private static final String VERSION_COMMAND = "Version";
     private static final String HELLO_COMMAND = "Hello";
+    private static final String SEARCHRESULT_COMMAND = "SR";
     private static final String SEARCH_COMMAND = "Search";
     private static final String HUBNAME_COMMAND = "HubName";
     private static final String LOCK_COMMAND = "Lock";
@@ -98,5 +105,33 @@ public class Command {
 
     public boolean isMyInfoCommand() {
         return command.equals(MYINFO_COMMAND);
+    }
+
+    public boolean isQuitCommand() {
+        return command.equals(QUIT_COMMAND);
+    }
+
+    public boolean isOpListCommand() {
+        return command.equals(OPLIST_COMMAND);
+    }
+
+    public boolean isForceMoveCommand() {
+        return command.equals(FORCEMOVE_COMMAND);
+    }
+
+    public boolean isSearchResultCommand() {
+        return command.equals(SEARCHRESULT_COMMAND);
+    }
+
+    public boolean isConnectToMeCommand() {
+        return command.equals(CONNECTTOME_COMMAND);
+    }
+
+    public boolean isReverseConnectToMeCommand() {
+        return command.equals(REVERSECONNECTTOME_COMMAND);
+    }
+
+    public boolean isPasswordRequiredCommand() {
+        return command.equals(GETPASS_COMMAND);
     }
 }
