@@ -6,6 +6,10 @@ public class Hub extends Object {
     private String description;
     private int users;
 
+    public Hub(String host) {
+        this("", host, "", 0);
+    }
+
     public Hub(String name, String host, String description, int users) {
         this.name = name;
         this.host = host;

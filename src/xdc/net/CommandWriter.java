@@ -2,7 +2,7 @@ package xdc.net;
 
 import java.io.*;
 
-public class CommandWriter {
+class CommandWriter {
     private static final String COMMAND_SEPARATOR = "|";
 
     private OutputStreamWriter out;

@@ -2,7 +2,7 @@ package xdc.net;
 
 import java.io.*;
 
-public class CommandReader {
+class CommandReader {
     private static final char COMMAND_SEPARATOR = '|';
     private static final String COMMAND_PREFIX_SEPARATOR = " ";
 
@@ -46,11 +46,8 @@ public class CommandReader {
 
         if (commandType.startsWith("$")) {
             return new Command(false, commandType.substring(1), commandArgs);
-        } else if (commandType.startsWith("<")) {
-            if (commandType.length() > 1) {
-                return new Command(true, commandType.substring(1, commandType.length() - 1), commandArgs);
-            }
+        } else {
+            return new Command(true, null, commandType + (commandArgs != null ? COMMAND_PREFIX_SEPARATOR + commandArgs : ""));
         }
-        return null;
     }
 }
