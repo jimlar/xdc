@@ -5,6 +5,8 @@ import xdc.net.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class XDCFrame extends JFrame {
     private JTable hubListTable;
@@ -21,11 +23,28 @@ public class XDCFrame extends JFrame {
         Container contentPane = getContentPane();
         tabbedPane = new JTabbedPane();
         contentPane.setLayout(new BorderLayout());
-        contentPane.add(tabbedPane, BorderLayout.CENTER);
+
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        splitPane.setOneTouchExpandable(true);
+        splitPane.setTopComponent(tabbedPane);
+        splitPane.setBottomComponent(new DowloadsPanel());
+        splitPane.setDividerLocation(400);
+
+        contentPane.add(splitPane, BorderLayout.CENTER);
 
         hubListTable = new JTable();
         hubListTableModel = new HubsTableModel();
         hubListTable.setModel(hubListTableModel);
+        hubListTable.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() > 1) {
+                    Hub hub = hubListTableModel.getHub(hubListTable.getSelectedRow());
+                    if (hub != null) {
+                        connect(hub);
+                    }
+                }
+            }
+        });
 
         JPanel hubListPanel = new JPanel(new BorderLayout());
         hubListPanel.add(getConnectPanel(), BorderLayout.NORTH);

@@ -27,6 +27,7 @@ public class ConnectionDetailsPanel extends JPanel {
                                               true,
                                               tabbedPane,
                                               new JScrollPane(userList));
+        splitPane.setOneTouchExpandable(true);
 
         splitPane.setDividerLocation(350);
         this.add(splitPane, BorderLayout.CENTER);
