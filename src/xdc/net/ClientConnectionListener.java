@@ -2,7 +2,7 @@ package xdc.net;
 
 public interface ClientConnectionListener {
 
-    void connected(PassiveClientConnection connection);
+    void connected(ClientConnection connection);
 
-    void disconnected(PassiveClientConnection connection, String message);
+    void disconnected(ClientConnection connection, String message);
 }
