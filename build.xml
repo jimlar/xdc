@@ -1,19 +1,15 @@
 <?xml version="1.0"?>
 
-<project name="Tanx" default="tanx" basedir=".">
-
-
+<project name="xdc" default="xdc" basedir=".">
   <property name="build.compiler" value="jikes" />
 
   <property name="classpath" value="src:
 		                    build/classes"/>
 
-  <!-- clean -->
   <target name="clean">
     <delete dir="build" />
   </target>
 
-  <!-- compile -->
   <target name="compile">
     <mkdir dir="build/classes"/>
 
@@ -24,12 +20,10 @@
     </javac>
   </target>
 
-  <!-- jimirc -->
-  <target name="tanx" depends="compile">
-
-    <jar jarfile="build/tanx.jar">
+  <target name="xdc" depends="compile">
+    <jar jarfile="build/xdc.jar">
       <manifest>
-        <attribute name="Main-Class" value="tanx.Main"/>
+        <attribute name="Main-Class" value="xdc.Main"/>
       </manifest>
       <fileset dir="build/classes" includes="**/*.class"/>
     </jar>
